@@ -36,7 +36,7 @@ void checkConditionalRenderingCapabilities (vkt::Context& context, const Conditi
 	if (!vk::isDeviceExtensionSupported(context.getUsedApiVersion(), context.getDeviceExtensions(), "VK_EXT_conditional_rendering"))
 		TCU_THROW(NotSupportedError, "Missing extension: VK_EXT_conditional_rendering");
 
-	if (data.useSecondaryBuffer)
+	if (data.conditionInherited)
 	{
 		const vk::VkPhysicalDeviceConditionalRenderingFeaturesEXT& conditionalRenderingFeatures = context.getConditionalRenderingFeatures();
 		if (!conditionalRenderingFeatures.inheritedConditionalRendering)
@@ -80,11 +80,22 @@ void beginConditionalRendering (const vk::DeviceInterface& vk, vk::VkCommandBuff
 
 std::ostream& operator<< (std::ostream& str, ConditionalData const& c)
 {
-	str << (c.conditionEnabled ? "condition" : "no_condition");
-
-	if (c.useSecondaryBuffer)
+	if (c.conditionInPrimaryCommandBuffer)
 	{
-		str << "_secondary_buffer";
+		str << "condition_primary_buffer";
+	}
+	else if(c.conditionInSecondaryCommandBuffer)
+	{
+		str << "condition_secondary_buffer";
+	}
+	else
+	{
+		str << "no_condition";
+	}
+
+	if (c.conditionInherited)
+	{
+		str << "_inherited";
 	}
 
 	str << "_" << (c.expectCommandExecution ? "expect_execution" : "expect_noop");
